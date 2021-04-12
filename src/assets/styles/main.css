@@ -714,8 +714,8 @@ h2 {
 }
 
 .image-upload {
-    width: 50%;
-    height: 50%;
+    width: 2rem;
+    height: 2rem;
 }
 
 .modal-mobile-card {
@@ -1435,15 +1435,71 @@ h2 {
     color: #bdbdbd;
 }
 
+.dropzone-mappicker {
+    width: 12rem;
+    height: 2rem;
+    padding: 10px;
+    text-align: center;
+    background-color: #226dff;
+    color: white;
+    font-size: 16px;
+    border-radius: 4px;
+}
+
 .imageModalSave {
     text-align: center;
     justify-content: center;
-    padding: 10px;
+    margin-bottom: auto;
 }
 
 .saveButton {
     margin: 10px 10px;
+    width: 5rem;
 }
 .cancelButton {
     margin: 10px 10px;
+}
+
+.align-items {
+    display: flex;
+    align-items: start;
+    height: 50%;
+    margin-bottom: 5px;
+}
+.rowheight {
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+}
+
+.settingURLandLogo {
+    display: flex;
+    justify-items: start;
+    gap: 20px;
+}
+.uploadButtonWidth {
+    width: 30vw;
+}
+.urlFormandLogoTitle {
+    display: flex;
+    gap: 625px;
+}
+.chooseDefaultLocationText {
+    text-align: left;
+    margin-left: 0%;
+    padding: 30px;
+}
+
+.custom-color {
+    font-size: 12px;
+    text-align: center;
+    margin-top: 50%;
+    margin-bottom: 50%;
+    font-weight: bold;
+}
+
+.upload-restrict {
+    max-height: 3vw;
+    max-width: 3vw;
+    margin-top: 35px;
 }

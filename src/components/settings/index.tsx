@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 import { withFirestore } from 'react-redux-firebase';
@@ -11,13 +11,14 @@ const defaultZoom = 2;
 const defaultCoords = { lat: defaultLat, lng: defaultLng };
 
 function Settings({ firebase, team }) {
+
     return (
         <div>
             <MapPicker
             center={defaultCoords}
             zoom={defaultZoom}
-            >
-            </MapPicker>
+            team={team}
+            />
         </div>
     )
 }

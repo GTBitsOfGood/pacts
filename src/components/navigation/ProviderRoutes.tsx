@@ -8,6 +8,7 @@ import {
 import NavBar from './NavBar';
 import Auth from '../auth/Auth';
 import Dashboard from '../dashboard';
+import settings from '../settings';
 import AddProvider from '../dashboard/AddProvider';
 import PasswordForgetForm from '../auth/PasswordForget';
 import Template from '../template';
@@ -19,7 +20,7 @@ import useWindowSize from '../../functions/useWindowSize';
 import Modal from "react-bootstrap/Modal";
 
 import {
-  providerRoute, formRoute, authRoute, pwdRoute, templateRoute, chatRoute 
+  providerRoute, formRoute, authRoute, pwdRoute, templateRoute, chatRoute, settingsRoute 
 } from '../../routes/pathnames';
 
 const classNames = require("classnames");
@@ -66,6 +67,10 @@ function DashboardContent({ isAuth, auth }) {
         <PrivateRoute
           path={chatRoute}
           component={Chat}
+        />
+        <PrivateRoute
+          path={settingsRoute}
+          component={settings}
         />
       </Switch>
     </div>

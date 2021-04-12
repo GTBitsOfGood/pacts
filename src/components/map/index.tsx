@@ -81,7 +81,7 @@ const Map = (props) => {
             setTempProviders(providers);
 
             // grab the contents of the query string as an object
-            // a properly formatted query string with a search term and a zip looks like: mapscout.io/?zip=12345&q=asdf
+            // a prperly formatted query string with a search term and a zip looks like: mapscout.io/?zip=12345&q=asdf
             const parsed = queryString.parse(window.location.search);
             // if there exists a zip object in the querystring (i.e. mapscout.io/?zip=12345)
             if (typeof parsed.zip == "string") {

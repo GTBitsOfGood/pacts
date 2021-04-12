@@ -46,6 +46,7 @@
         "react-bootstrap-table-next": "^3.2.1",
         "react-bootstrap-time-picker": "^2.0.1",
         "react-collapse": "^5.0.1",
+        "react-color": "^2.19.3",
         "react-dom": "^16.8.6",
         "react-dropzone": "^11.3.1",
         "react-firebase-file-uploader": "^2.4.3",

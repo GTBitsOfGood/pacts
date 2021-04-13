@@ -1,3 +1,6 @@
+import { connect } from 'react-redux';
+import { compose } from 'redux';
+import { withFirestore } from 'react-redux-firebase';
 import React,{Component} from 'react';
 import { jsonToCSV } from 'react-papaparse';
 import Button from 'react-bootstrap/Button';
@@ -10,7 +13,27 @@ import { createDocumentRegistry, createKeywordTypeNode } from 'typescript';
 
 const ExportCSV = (props) => {
 
+  const defaultItem = {
+    facilityName: '',
+    address: [],
+    description: '',
+    buildingNum: [0],
+    childcare: [false],
+    epic: [false],
+    hours: {},
+    links: {},
+    notes: [],
+    phoneNum: [],
+    latitude: 0,
+    longitude: 0,
+    website: [],
+    image: 'modalimage.png',
+    imageURL: null,
+  };
+
+
   const [show, setShow] = React.useState(false);
+  const [importProviders, setImportProviders] = React.useState(null);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const columns = ["address", "buildingNum", "description", "facilityName", "hours", "id",
@@ -27,7 +50,6 @@ const ExportCSV = (props) => {
     delimiter: ",",
     header: true,
     newline: "\n",
-    complete: {handleOnDrop},
     skipEmptyLines: 'false', //or 'greedy',
     columns: columns
   }
@@ -75,7 +97,7 @@ const ExportCSV = (props) => {
     window.open(encodedUri);
   }
 
-  function handleOnDrop(data) {
+  async function handleDrop(data) {
     let oldProviders : {id: string}[] = Array.from(props.providers);
     let oldCategories: {id: string}[] = Array.from(props.categories);
     console.log("older categories", oldCategories);
@@ -98,6 +120,35 @@ const ExportCSV = (props) => {
         mergedProviders.push(oldProviders[i]);
       }
       isDifferent = false;
+    }
+
+    for (let i = 0; i < mergedProviders.length; i++) {
+      mergedProviders[i].data['team'] = props.team.name;
+      for (const property in mergedProviders[i].data) {
+        const trimmedProperty = property.trim();
+        if (property != trimmedProperty) {
+          mergedProviders[i].data[trimmedProperty] = JSON.parse(JSON.stringify(mergedProviders[i].data[property]));
+          delete mergedProviders[i].data[property]
+        }
+        if (trimmedProperty in defaultItem && Array.isArray(defaultItem[trimmedProperty])) { // Handle default array categories
+          mergedProviders[i].data[trimmedProperty] = mergedProviders[i].data[trimmedProperty] ? [mergedProviders[i].data[trimmedProperty]] : []
+        } else if (trimmedProperty in defaultItem && typeof defaultItem[trimmedProperty] === "number") { // Handle default number categories
+          mergedProviders[i].data[trimmedProperty] = Number(mergedProviders[i].data[trimmedProperty])
+        } else if (trimmedProperty in defaultItem && (trimmedProperty === "hours" || trimmedProperty === "links")) { // Handle default object categories
+          mergedProviders[i].data[trimmedProperty] = JSON.parse(mergedProviders[i].data[trimmedProperty]);
+        } else if (columns.includes(trimmedProperty) && !(trimmedProperty in defaultItem)) { // Handle custom array categories
+          const doc = await props.firestore.collection('categories').doc(trimmedProperty).get();
+          console.log(columns);
+          if (doc.data()) {
+            const selectType = doc.data()['select_type'];
+            if (selectType === 2) {
+              mergedProviders[i].data[trimmedProperty] = mergedProviders[i].data[trimmedProperty] ? mergedProviders[i].data[trimmedProperty].split(',') : []
+            }
+          } else {
+            alert(`Warning: You are uploading a CSV where the ${trimmedProperty} column is not defined`);
+          }
+        }
+      }
     }
 
     var columnArr= [];
@@ -149,9 +200,22 @@ const ExportCSV = (props) => {
         }
       }
     }
+    setImportProviders(mergedProviders);
+  }
 
-    console.log("merged Providers", mergedProviders);
-    console.log("merged categories", oldCategories);
+  function handleRemoveFile() {
+    setImportProviders(null);
+  }
+
+  async function handleSubmit() {
+    if (importProviders) {
+      let promises = [];
+      importProviders.forEach(async (provider) => {
+        await props.firestore.collection('providers').doc(provider.data.facilityName).set(provider.data);
+      });
+      await Promise.all(promises);
+      handleClose();
+    }
   }
 
   return (
@@ -170,21 +234,19 @@ const ExportCSV = (props) => {
         </Modal.Header>
         <Modal.Body>
           <CSVReader
-            onDrop={handleOnDrop}
-            // onError={this.handleOnError}
-            style={{}}
+            onDrop={handleDrop}
             config={importConfig}
             addRemoveButton
-            // onRemoveFile={this.handleOnRemoveFile}
+            onRemoveFile={handleRemoveFile}
           >
-            <span>Drop CSV file here or click to upload.</span>
+            <span>Drop CSV file here or click to upload 1.</span>
           </CSVReader>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
             Exit
           </Button>
-          <Button variant="primary" onClick={handleClose}>
+          <Button variant="primary" onClick={handleSubmit}>
             Upload
           </Button>
         </Modal.Footer>
@@ -193,4 +255,10 @@ const ExportCSV = (props) => {
   );
   }
 
-export default ExportCSV;
+export default compose<any>(
+  withFirestore,
+  connect((state) => ({
+    firebase: state.firebase,
+    team: state.item.team,
+  })),
+)(ExportCSV)
